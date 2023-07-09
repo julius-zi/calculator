@@ -4,6 +4,7 @@ let num1;
 let num2;
 let result;
 let displayValue;
+let numReady = false;
 let infoDisplayValue;
 
 const display = document.querySelector('.display span');
@@ -37,46 +38,53 @@ wrapper.addEventListener('click', (event) => {
     if (!isButton) return;
     let pressedButton = event.target.innerText; 
 
-    // Check if pressed button is a number and save it as displayValue if so
+    // Check if pressed button is a number and append it to displayValue if so
     if (!["+", "-", "*", "/","=", "CLR"].includes(pressedButton)) {
-            display.innerText += pressedButton;
-            displayValue = display.innerText;
+        display.innerText += pressedButton;
+        displayValue = display.innerText;
+        numReady = true;
     }
 
-    if (["+", "-", "*", "/"].includes(pressedButton) && num1 == undefined) {
+    // Perform an operation if one is selected and there is a previous number and operation and a new number has been entered
+    if (["+", "-", "*", "/"].includes(pressedButton) && num1 !== undefined && displayValue !== undefined && op !== undefined && numReady) {
+        num2 = parseInt(displayValue);
+        result = operate(num1,num2,op);
+        infoDisplay.innerText = `${result} ${pressedButton}`; // Show current operation in infoDisplay
+        num1 = result;
+        display.innerText = ""; // Clear display until final result needs to be shown
+        displayValue = undefined;
+        op = pressedButton;
+        numReady = false;
+    } 
+    // Store operator and operand
+    else if (["+", "-", "*", "/"].includes(pressedButton) && num1 === undefined && displayValue !== undefined) {
         op = pressedButton;
         num1 = parseInt(displayValue);
+        infoDisplay.innerText = `${num1} ${op}`; // Show current operation in infoDisplay
+        display.innerText = ""; // Clear display until final result needs to be shown
         displayValue = undefined;
-        display.innerText = "";
+        numReady = false;
     }
 
-    if (pressedButton === "=") {
+    if (pressedButton === "=" && num1 !== undefined && op !== undefined && displayValue !== undefined) {
         num2 = parseInt(displayValue);
         result = operate(num1,num2,op);
         display.innerText = result;
-    }
-
-    if (["+", "-", "*", "/"].includes(pressedButton) && num1 !== undefined && num2 !== undefined) {
-        op = pressedButton;
+        infoDisplay.innerText = ""; // Clear infoDisplay after final result is shown
         num1 = result;
-        bool = true;
         displayValue = undefined;
-        display.innerText = "";
+        op = undefined;
     }
 
-    if (pressedButton === "=" && bool == true) {
-        num2 = parseInt(displayValue);
-        result = operate(num1,num2,op);
-        display.innerText = result;
-    }
-
-
-    // Clear by klick on CLR
+    // Clear by click on CLR
     if (pressedButton === "CLR") {
         display.innerText = "";
+        infoDisplay.innerText = "";
         displayValue = undefined;
         num1 = undefined;
         num2 = undefined;
+        op = undefined;
+        numReady = false;
     }
 
 });
